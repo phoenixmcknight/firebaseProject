@@ -13,7 +13,12 @@
 		6928455523887C57004D2681 /* SignUpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6928455323887C57004D2681 /* SignUpViewController.swift */; };
 		6928455623887C57004D2681 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6928455423887C57004D2681 /* LoginViewController.swift */; };
 		6928455923887CD7004D2681 /* String+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6928455823887CD7004D2681 /* String+Extensions.swift */; };
-		6928455B23887D42004D2681 /* ProfileVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6928455A23887D42004D2681 /* ProfileVC.swift */; };
+		6928455E2388852D004D2681 /* ProfileSetupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6928455D2388852D004D2681 /* ProfileSetupViewController.swift */; };
+		692845672388892A004D2681 /* FirestoreService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 692845662388892A004D2681 /* FirestoreService.swift */; };
+		6928456A23888954004D2681 /* AppUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6928456823888954004D2681 /* AppUser.swift */; };
+		6928456B23888954004D2681 /* Post.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6928456923888954004D2681 /* Post.swift */; };
+		6928456D23888A4F004D2681 /* FirebaseStorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6928456C23888A4E004D2681 /* FirebaseStorageService.swift */; };
+		6928456F238C6AC3004D2681 /* TabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6928456E238C6AC3004D2681 /* TabBarController.swift */; };
 		693211B223886F19003378DE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 693211B123886F19003378DE /* AppDelegate.swift */; };
 		693211B423886F19003378DE /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 693211B323886F19003378DE /* SceneDelegate.swift */; };
 		693211BC23886F19003378DE /* FireBaseProject.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 693211BA23886F19003378DE /* FireBaseProject.xcdatamodeld */; };
@@ -41,7 +46,12 @@
 		6928455323887C57004D2681 /* SignUpViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignUpViewController.swift; sourceTree = "<group>"; };
 		6928455423887C57004D2681 /* LoginViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		6928455823887CD7004D2681 /* String+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+Extensions.swift"; sourceTree = "<group>"; };
-		6928455A23887D42004D2681 /* ProfileVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileVC.swift; sourceTree = "<group>"; };
+		6928455D2388852D004D2681 /* ProfileSetupViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfileSetupViewController.swift; sourceTree = "<group>"; };
+		692845662388892A004D2681 /* FirestoreService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FirestoreService.swift; sourceTree = "<group>"; };
+		6928456823888954004D2681 /* AppUser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppUser.swift; sourceTree = "<group>"; };
+		6928456923888954004D2681 /* Post.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Post.swift; sourceTree = "<group>"; };
+		6928456C23888A4E004D2681 /* FirebaseStorageService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FirebaseStorageService.swift; sourceTree = "<group>"; };
+		6928456E238C6AC3004D2681 /* TabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarController.swift; sourceTree = "<group>"; };
 		693211AE23886F19003378DE /* FireBaseProject.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FireBaseProject.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		693211B123886F19003378DE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		693211B323886F19003378DE /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -82,7 +92,6 @@
 			isa = PBXGroup;
 			children = (
 				6928455223887C57004D2681 /* Login */,
-				6928455A23887D42004D2681 /* ProfileVC.swift */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -91,6 +100,8 @@
 			isa = PBXGroup;
 			children = (
 				6928454C238879C9004D2681 /* FirebaseAuthService.swift */,
+				692845662388892A004D2681 /* FirestoreService.swift */,
+				6928456C23888A4E004D2681 /* FirebaseStorageService.swift */,
 			);
 			path = Firebase;
 			sourceTree = "<group>";
@@ -98,6 +109,7 @@
 		6928455223887C57004D2681 /* Login */ = {
 			isa = PBXGroup;
 			children = (
+				6928455C23888521004D2681 /* Users */,
 				6928455323887C57004D2681 /* SignUpViewController.swift */,
 				6928455423887C57004D2681 /* LoginViewController.swift */,
 			);
@@ -110,6 +122,24 @@
 				6928455823887CD7004D2681 /* String+Extensions.swift */,
 			);
 			path = Utilities;
+			sourceTree = "<group>";
+		};
+		6928455C23888521004D2681 /* Users */ = {
+			isa = PBXGroup;
+			children = (
+				6928455D2388852D004D2681 /* ProfileSetupViewController.swift */,
+				6928456E238C6AC3004D2681 /* TabBarController.swift */,
+			);
+			path = Users;
+			sourceTree = "<group>";
+		};
+		6928456123888781004D2681 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				6928456823888954004D2681 /* AppUser.swift */,
+				6928456923888954004D2681 /* Post.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 		693211A523886F18003378DE = {
@@ -135,6 +165,7 @@
 		693211B023886F19003378DE /* FireBaseProject */ = {
 			isa = PBXGroup;
 			children = (
+				6928456123888781004D2681 /* Models */,
 				6928455723887CD7004D2681 /* Utilities */,
 				6928454823887802004D2681 /* ViewControllers */,
 				693211B123886F19003378DE /* AppDelegate.swift */,
@@ -346,13 +377,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6928455E2388852D004D2681 /* ProfileSetupViewController.swift in Sources */,
+				6928456F238C6AC3004D2681 /* TabBarController.swift in Sources */,
+				6928456B23888954004D2681 /* Post.swift in Sources */,
 				6928455623887C57004D2681 /* LoginViewController.swift in Sources */,
+				692845672388892A004D2681 /* FirestoreService.swift in Sources */,
 				6928455923887CD7004D2681 /* String+Extensions.swift in Sources */,
 				6928454E238879C9004D2681 /* FirebaseAuthService.swift in Sources */,
 				693211BC23886F19003378DE /* FireBaseProject.xcdatamodeld in Sources */,
-				6928455B23887D42004D2681 /* ProfileVC.swift in Sources */,
+				6928456A23888954004D2681 /* AppUser.swift in Sources */,
 				693211B223886F19003378DE /* AppDelegate.swift in Sources */,
 				693211B423886F19003378DE /* SceneDelegate.swift in Sources */,
+				6928456D23888A4F004D2681 /* FirebaseStorageService.swift in Sources */,
 				6928455523887C57004D2681 /* SignUpViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
