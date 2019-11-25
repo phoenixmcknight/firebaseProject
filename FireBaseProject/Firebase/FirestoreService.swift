@@ -142,38 +142,38 @@ class FirestoreService {
         
     }
     
-    //MARK: Comments
-    
-    func createComment(comment: Comment, completion: @escaping (Result<(), Error>) -> ()) {
-        var fields = comment.fieldsDict
-        fields["dateCreated"] = Date()
-        db.collection(FireStoreCollections.comments.rawValue).addDocument(data: fields) { (error) in
-            if let error = error {
-                completion(.failure(error))
-            } else {
-                completion(.success(()))
-            }
-        }
-    }
-    
-    func getComments(forPostID: String, completion: @escaping (Result<[Comment], Error>) -> ()) {
-        db.collection(FireStoreCollections.comments.rawValue).whereField("postID", isEqualTo: forPostID).getDocuments { (snapshot, error) in
-            if let error = error {
-                completion(.failure(error))
-            } else {
-                let comments = snapshot?.documents.compactMap({ (snapshot) -> Comment? in
-                    let commentID = snapshot.documentID
-                    let comment = Comment(from: snapshot.data(), id: commentID)
-                    return comment
-                })
-                completion(.success(comments ?? []))
-            }
-        }
-    }
-    
-    func getComments(forUserID: String, completion: @escaping (Result<[Comment], Error>) -> ()) {
-        
-    }
+//    //MARK: Comments
+//    
+//    func createComment(comment: Comment, completion: @escaping (Result<(), Error>) -> ()) {
+//        var fields = comment.fieldsDict
+//        fields["dateCreated"] = Date()
+//        db.collection(FireStoreCollections.comments.rawValue).addDocument(data: fields) { (error) in
+//            if let error = error {
+//                completion(.failure(error))
+//            } else {
+//                completion(.success(()))
+//            }
+//        }
+//    }
+//    
+//    func getComments(forPostID: String, completion: @escaping (Result<[Comment], Error>) -> ()) {
+//        db.collection(FireStoreCollections.comments.rawValue).whereField("postID", isEqualTo: forPostID).getDocuments { (snapshot, error) in
+//            if let error = error {
+//                completion(.failure(error))
+//            } else {
+//                let comments = snapshot?.documents.compactMap({ (snapshot) -> Comment? in
+//                    let commentID = snapshot.documentID
+//                    let comment = Comment(from: snapshot.data(), id: commentID)
+//                    return comment
+//                })
+//                completion(.success(comments ?? []))
+//            }
+//        }
+//    }
+//    
+//    func getComments(forUserID: String, completion: @escaping (Result<[Comment], Error>) -> ()) {
+//        
+//    }
     
     private init () {}
 }

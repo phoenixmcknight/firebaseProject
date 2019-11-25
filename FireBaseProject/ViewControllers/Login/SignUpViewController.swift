@@ -49,7 +49,7 @@ class SignUpViewController: UIViewController {
       
       lazy var createButton: UIButton = {
           let button = UIButton(type: .system)
-          button.setTitle("Create", for: .normal)
+          button.setTitle("Continue", for: .normal)
           button.setTitleColor(.white, for: .normal)
           button.titleLabel?.font = UIFont(name: "Verdana-Bold", size: 14)
           button.backgroundColor = UIColor(red: 255/255, green: 67/255, blue: 0/255, alpha: 1)
@@ -98,9 +98,13 @@ class SignUpViewController: UIViewController {
                  return
              }
              
-             FirebaseAuthService.manager.createNewUser(email: email.lowercased(), password: password) { [weak self] (result) in
-                 self?.handleCreateAccountResponse(with: result)
-             }
+let profileVC = CreateProfileVC()
+        profileVC.emailAndPassword.0 = email
+        profileVC.emailAndPassword.1 = password
+       present(profileVC,animated: true) 
+        //             FirebaseAuthService.manager.createNewUser(email: email.lowercased(), password: password) { [weak self] (result) in
+//                 self?.handleCreateAccountResponse(with: result)
+//             }
          }
       
       //MARK: Private Methods
@@ -111,34 +115,7 @@ class SignUpViewController: UIViewController {
              present(alertVC, animated: true, completion: nil)
          }
       
-      private func handleCreateAccountResponse(with result: Result<User, Error>) {
-          DispatchQueue.main.async { [weak self] in
-              switch result {
-              case.success(let user):
-              print(user)
-                  guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                      let sceneDelegate = windowScene.delegate as? SceneDelegate, let window = sceneDelegate.window
-                      else {
-                          //MARK: TODO - handle could not swap root view controller
-                          return
-                  }
-                  
-                  if FirebaseAuthService.manager.currentUser != nil {
-                      UIView.transition(with: window, duration: 0.3, options: .transitionFlipFromBottom, animations: {
-                          window.rootViewController = ProfileVC()
-                      }, completion: nil)
-                      
-                  } else {
-                      print("No current user")
-                  }
-                  
-                  
-              case .failure(let error):
-                  self?.showAlert(with: "Error Creating User", and: error.localizedDescription)
-              }
-               
-          }
-      }
+    
       
 
       

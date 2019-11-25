@@ -22,9 +22,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                              window?.windowScene = scene
 
                if FirebaseAuthService.manager.currentUser != nil {
-                   window?.rootViewController = ProfileVC()
+                   window?.rootViewController = CreateProfileVC()
                } else {
-                             window?.rootViewController = ProfileVC()
+                
+                window?.rootViewController = LoginViewController()
                }
                              window?.makeKeyAndVisible()
            }

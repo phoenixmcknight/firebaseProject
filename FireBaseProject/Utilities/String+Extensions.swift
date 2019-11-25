@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 extension String {
     var isValidEmail: Bool {
 
@@ -27,5 +28,15 @@ extension String {
         let validPasswordRegEx =  "[A-Z0-9a-z!@#$&*.-]{8,}"
         let passwordPredicate = NSPredicate(format: "SELF MATCHES %@", validPasswordRegEx)
         return passwordPredicate.evaluate(with: self)
+    }
+}
+extension UILabel {
+public convenience init(font:UIFont){
+    self.init()
+    self.textAlignment = .center
+    self.textColor = .black
+    self.adjustsFontSizeToFitWidth = true
+    self.numberOfLines = 0
+    self.font = font
     }
 }
