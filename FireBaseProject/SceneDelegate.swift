@@ -22,11 +22,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                              window?.windowScene = scene
 
                if FirebaseAuthService.manager.currentUser != nil {
-                   window?.rootViewController = CreateProfileVC()
+                window?.rootViewController = TabBarController()
                } else {
                 
-                window?.rootViewController = LoginViewController()
-               }
+                window?.rootViewController =  LoginViewController()
+                
+        }
                              window?.makeKeyAndVisible()
            }
         
@@ -65,5 +66,23 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
 
+//private func createMainTabBarController() -> UITabBarController {
+//    let navController = UINavigationController(rootViewController: FeedViewController())
+//    
+//    let createVC = UINavigationController(rootViewController: CreatePhotoVC())
+//    
+//   
+//   navController.tabBarItem = UITabBarItem(title: "Feed", image: UIImage(systemName: "photo.on.rectangle"), tag: 0)
+//      
+//       createVC.tabBarItem = UITabBarItem(title: "Create", image: UIImage(systemName: "plus.square"), tag: 1)
+//    
+//      
+//   
+//    let tabVC = UITabBarController()
+//    
+//    tabVC.viewControllers = [navController,createVC]
+//
+//    return tabVC
+//}
 
 
