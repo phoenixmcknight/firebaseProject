@@ -10,38 +10,43 @@ import Foundation
 import FirebaseFirestore
 
 struct Post {
-    let title: String
-    let body: String
-    let id: String
+    let feedImage:String
     let creatorID: String
     let dateCreated: Date?
-    
-    init(title: String, body: String, creatorID: String, dateCreated: Date? = nil) {
-        self.title = title
-        self.body = body
+    let id:String
+    let title:String
+    let body:String
+    let username:String
+    init(feedImage:String, creatorID: String, dateCreated: Date? = nil, title:String,body:String,username:String) {
+        self.feedImage = feedImage
         self.creatorID = creatorID
+        self.username = username
         self.id = UUID().description
         self.dateCreated = dateCreated
+        self.title = title
+        self.body = body
     }
     
     init?(from dict: [String: Any], id: String) {
-        guard let title = dict["title"] as? String,
-            let body = dict["body"] as? String,
-            let userID = dict["creatorID"] as? String,
-            let dateCreated = (dict["dateCreated"] as? Timestamp)?.dateValue() else { return nil }
+        guard let feedImage = dict["feedImage"] as? String, let userID = dict["creatorID"] as? String,
+            let dateCreated = (dict["dateCreated"] as? Timestamp)?.dateValue(), let title = dict["title"] as? String, let body = dict["body"] as? String, let username = dict["username"] as? String else { return nil }
         
-        self.title = title
-        self.body = body
+        self.feedImage = feedImage
         self.creatorID = userID
         self.id = id
         self.dateCreated = dateCreated
+        self.title = title
+        self.body = body
+        self.username = username
     }
     
     var fieldsDict: [String: Any] {
         return [
-            "title": self.title,
-            "body": self.body,
-            "creatorID": self.creatorID
+            "feedImage": self.feedImage,
+            "creatorID": self.creatorID,
+            "title":self.title,
+            "body":self.body,
+            "username":self.username
         ]
     }
 }

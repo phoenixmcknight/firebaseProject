@@ -12,7 +12,6 @@ import FirebaseAuth
 
 class CreateProfileVC: UIViewController {
     
-    var settingFromLogin = false
     
     var currentUser:Result<User,Error>? = nil
     
@@ -32,7 +31,7 @@ class CreateProfileVC: UIViewController {
     }()
     
     lazy var displayNameButton:UIButton = {
-        let db = UIButton(type: UIButton.ButtonType.detailDisclosure)
+        let db = UIButton(type: UIButton.ButtonType.contactAdd)
         db.addTarget(self, action: #selector(enterDisplayName), for: .touchUpInside)
         return db
     }()
@@ -90,7 +89,7 @@ class CreateProfileVC: UIViewController {
         }
         
         
-        FirebaseAuthService.manager.createNewUser(email: emailAndPassword.0.lowercased(), password: emailAndPassword.1.lowercased()) { [weak self] (result) in
+        FirebaseAuthService.manager.createNewUser(email: emailAndPassword.0.lowercased().trimmingCharacters(in: .whitespacesAndNewlines), password: emailAndPassword.1.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)) { [weak self] (result) in
        
             self?.currentUser = result
             self?.handleCreateAccountResponse(with: result)
@@ -103,9 +102,27 @@ class CreateProfileVC: UIViewController {
                     switch nextResult {
                     case .success():
 
-                       //placeholder - change to Feed VC later
-                        self?.navigationController?.pushViewController(LoginViewController(), animated: true)
-                    //                        self?.handleNavigationAwayFromVC()
+                        FirebaseAuthService.manager.updateUserFields(userName: username, photoURL: image) { (result) in
+                            switch result {
+                            case .failure(let error):
+                                print(error)
+                            case .success(()):
+                                print("gotcha")
+                                guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                                                  let sceneDelegate = windowScene.delegate as? SceneDelegate, let window = sceneDelegate.window
+                                                  else {
+                                                      //MARK: TODO - handle could not swap root view controller
+                                                      return
+                                              }
+                                              
+                                              //MARK: TODO - refactor this logic into scene delegate
+                                              UIView.transition(with: window, duration: 0.3, options: .transitionFlipFromBottom, animations: {
+                                                  
+                                                      window.rootViewController = TabBarController()
+                                                  
+                                              }, completion: nil)
+                            }
+                        }
                     case .failure(let error):
                     
                         //MARK: TODO - handle
@@ -130,6 +147,15 @@ class CreateProfileVC: UIViewController {
         present(alertVC, animated: true, completion: nil)
     }
     
+    private func showErrorAlert(with title: String, and message: String) {
+        let alertVC = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alertVC.addAction(UIAlertAction(title: "Ok", style: .cancel, handler: { (action) in
+            self.dismiss(animated: true, completion: nil)
+        }))
+            
+        present(alertVC, animated: true, completion: nil)
+    }
+    
    @objc private func imageAlert() {
         let alertVC = UIAlertController(title: "Profile Image", message: "", preferredStyle: .actionSheet)
         
@@ -137,7 +163,7 @@ class CreateProfileVC: UIViewController {
             guard let image = UIImage(systemName: "person.fill")?.jpegData(compressionQuality: 0.7) else {return}
             self.profileImageView.image = UIImage(data: image)
             
-            FirebaseStorageService.manager.storeImage(image:image) { (result) in
+            FirebaseStorageService.manager.storeImage(image:image,destination:.profileImages) { (result) in
                 switch result {
                 case .success(let url):
                     self.imageURL = url
@@ -193,22 +219,7 @@ class CreateProfileVC: UIViewController {
         }
     }
     
-//    private func handleNavigationAwayFromVC() {
-//        if settingFromLogin {
-//            //MARK: TODO - refactor this logic into scene delegate
-//            guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-//                let sceneDelegate = windowScene.delegate as? SceneDelegate, let window = sceneDelegate.window
-//                else {
-//                    //MARK: TODO - handle could not swap root view controller
-//                    return
-//            }
-//            UIView.transition(with: window, duration: 0.3, options: .transitionFlipFromBottom, animations: {
-////                window.rootViewController = RedditTabBarViewController()
-//            }, completion: nil)
-//        } else {
-//            self.navigationController?.popViewController(animated: true)
-//        }
-//    }
+
     private func addSubviews() {
         for newView in viewArray {
     self.view.addSubview(newView)
@@ -232,53 +243,27 @@ class CreateProfileVC: UIViewController {
         ])
     }
     
-//    private func handleCreateAccountResponse(with result: Result<User, Error>) {
-//            DispatchQueue.main.async { [weak self] in
-//                switch result {
-//                case.success(let user):
-//                print(user)
-//                    guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-//                        let sceneDelegate = windowScene.delegate as? SceneDelegate, let window = sceneDelegate.window
-//                        else {
-//                            //MARK: TODO - handle could not swap root view controller
-//                            return
-//                    }
-//
-//                    if FirebaseAuthService.manager.currentUser != nil {
-//                        UIView.transition(with: window, duration: 0.3, options: .transitionFlipFromBottom, animations: {
-//                            window.rootViewController = CreateProfileVC()
-//                        }, completion: nil)
-//
-//                    } else {
-//                        print("No current user")
-//                    }
-//
-//
-//                case .failure(let error):
-//                    self?.showAlert(with: "Error Creating User", and: error.localizedDescription)
-//                }
-//
-//            }
-//        }
+
         
-        private func handleCreateAccountResponse(with result: Result<User, Error>) {
-                DispatchQueue.main.async { [weak self] in
+        private func handleCreateAccountResponse(with result: Result<User, Error>)  {
+                
                     switch result {
                     case .success(let user):
                         FirestoreService.manager.createAppUser(user: AppUser(from: user)) { [weak self] newResult in
-                            
+                      
                             print(newResult)
                         }
                     case .failure(let error):
-                        self?.showAlert(with: "Error creating user", and: "An error occured while creating new account \(error)")
+                        self.showErrorAlert(with: "Error creating user", and: "\(error)")
+                       
                     }
-                }
+                
             }
         
 
 
 
-
+   
     
    
     
@@ -289,11 +274,11 @@ class CreateProfileVC: UIViewController {
         
         NSLayoutConstraint.activate([
             saveButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -(UIScreen.main.bounds.height * 0.1)),
-            saveButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
+            saveButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -30),
            
-            saveButton.leadingAnchor.constraint(equalTo: view.leadingAnchor,constant: 10),
+            saveButton.leadingAnchor.constraint(equalTo: view.leadingAnchor,constant: 30),
             saveButton.heightAnchor.constraint(equalToConstant: 50),
-            saveButton.widthAnchor.constraint(equalToConstant: view.bounds.width / 3)
+            
         ])
     }
     
@@ -332,7 +317,7 @@ extension CreateProfileVC: UIImagePickerControllerDelegate, UINavigationControll
             return
         }
         
-        FirebaseStorageService.manager.storeImage(image: imageData, completion: { [weak self] (result) in
+        FirebaseStorageService.manager.storeImage(image: imageData, destination: .profileImages, completion: { [weak self] (result) in
             switch result{
             case .success(let url):
                 //Note - defer UI response, update user image url in auth and in firestore when save is pressed
