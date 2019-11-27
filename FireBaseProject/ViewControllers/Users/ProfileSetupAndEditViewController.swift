@@ -9,11 +9,18 @@
 import UIKit
 import Photos
 import FirebaseAuth
-
+enum ProfileStatus {
+    case creating
+    case editing
+}
 class CreateProfileVC: UIViewController {
     
     
     var currentUser:Result<User,Error>? = nil
+    
+    var currentProfileStatus:ProfileStatus = .creating
+    
+    var currentProfile:User?
     
     var emailAndPassword = ("","")
     //MARK: TODO - set up views using autolayout, not frames
@@ -26,7 +33,7 @@ class CreateProfileVC: UIViewController {
     lazy var displayName:UILabel = {
         let dn = UILabel(font: UIFont(name: "Verdana-Bold", size: 36.0)!)
         
-        dn.text = "Display Label"
+        dn.text = "User Name"
         return dn
     }()
     
@@ -73,6 +80,34 @@ class CreateProfileVC: UIViewController {
         //MARK: TODO - load in user image and fields when coming from profile page
     }
     
+    override func viewWillAppear(_ animated:Bool) {
+        super.viewWillAppear(animated)
+        if currentProfileStatus == .editing {
+            guard let user = currentProfile else {return}
+            displayName.text = user.displayName
+            imageHelperFunction(photoURL: user.photoURL?.absoluteString)
+            imageURL = user.photoURL
+            saveButton.titleLabel?.text = "Save Edits"
+        }
+    }
+    
+    private func imageHelperFunction(photoURL:String?) {
+        guard let url = photoURL else {return}
+        ImageHelper.shared.getImage(urlStr: url) { [weak self](result) in
+            DispatchQueue.main.async {
+                
+            
+            switch result {
+            case .failure(let error):
+                self?.showAlert(with: "Could Not Load Photo", and: "\(error)")
+                self?.profileImageView.image = UIImage(systemName: "photo")
+            case .success(let image):
+                self?.profileImageView.image = image
+                
+            }
+        }
+        }
+    }
     @objc private func savePressed(){
         
        
@@ -87,58 +122,101 @@ class CreateProfileVC: UIViewController {
             showAlert(with: "Invalid Profile Picture", and: "")
             return
         }
-        
+         if currentProfileStatus == .creating {
         
         FirebaseAuthService.manager.createNewUser(email: emailAndPassword.0.lowercased().trimmingCharacters(in: .whitespacesAndNewlines), password: emailAndPassword.1.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)) { [weak self] (result) in
        
             self?.currentUser = result
+            
+            guard self?.currentUser != nil else {self?.showAlert(with: "Could Not Create Account", and: "")
+            return}
+            
             self?.handleCreateAccountResponse(with: result)
             
-        
-            guard self?.currentUser != nil else {self?.showAlert(with: "Could Not Create Account", and: "")
-                return}
+            }
+            profileInformation(username: username, photoURL: image)
+        } else {
             
-                FirestoreService.manager.updateCurrentUser(userName: username, photoURL: image) { [weak self] (nextResult) in
-                    switch nextResult {
-                    case .success():
+            profileInformation(username:username , photoURL: image)
+        }
+//                FirestoreService.manager.updateCurrentUser(userName: username, photoURL: image) { [weak self] (nextResult) in
+//                    switch nextResult {
+//                    case .success():
+//
+//                        FirebaseAuthService.manager.updateUserFields(userName: username, photoURL: image) { (result) in
+//                            switch result {
+//                            case .failure(let error):
+//                                print(error)
+//                            case .success(()):
+//                                print("gotcha")
+//                                guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+//                                                  let sceneDelegate = windowScene.delegate as? SceneDelegate, let window = sceneDelegate.window
+//                                                  else {
+//                                                      //MARK: TODO - handle could not swap root view controller
+//                                                      return
+//                                              }
+//
+//                                              //MARK: TODO - refactor this logic into scene delegate
+//                                              UIView.transition(with: window, duration: 0.3, options: .transitionFlipFromBottom, animations: {
+//
+//                                                      window.rootViewController = TabBarController()
+//
+//                                              }, completion: nil)
+//                            }
+//                        }
+//                    case .failure(let error):
+//
+//                        //MARK: TODO - handle
+//
+//                        //Discussion - if can't update on user object in collection, our firestore object will not match what is in auth. should we:
+//                        // 1. Re-try the save?
+//                        // 2. Revert the changes on the auth user?
+//                        // This reconciliation should all be handled on the server side, but having to handle here, we could run into an infinite loop when re-saving.
+//                        print(error)
+//                    }
+//          //      }
+//                }
+            }
+        
+        
+    
+    private func profileInformation(username:String,photoURL:URL) {
+        FirestoreService.manager.updateCurrentUser(userName: username, photoURL: photoURL) { [weak self] (nextResult) in
+            switch nextResult {
+            case .success():
 
-                        FirebaseAuthService.manager.updateUserFields(userName: username, photoURL: image) { (result) in
-                            switch result {
-                            case .failure(let error):
-                                print(error)
-                            case .success(()):
-                                print("gotcha")
-                                guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                                                  let sceneDelegate = windowScene.delegate as? SceneDelegate, let window = sceneDelegate.window
-                                                  else {
-                                                      //MARK: TODO - handle could not swap root view controller
-                                                      return
-                                              }
-                                              
-                                              //MARK: TODO - refactor this logic into scene delegate
-                                              UIView.transition(with: window, duration: 0.3, options: .transitionFlipFromBottom, animations: {
-                                                  
-                                                      window.rootViewController = TabBarController()
-                                                  
-                                              }, completion: nil)
-                            }
-                        }
+                FirebaseAuthService.manager.updateUserFields(userName: username, photoURL: photoURL) { (result) in
+                    switch result {
                     case .failure(let error):
-                    
-                        //MARK: TODO - handle
-                        
-                        //Discussion - if can't update on user object in collection, our firestore object will not match what is in auth. should we:
-                        // 1. Re-try the save?
-                        // 2. Revert the changes on the auth user?
-                        // This reconciliation should all be handled on the server side, but having to handle here, we could run into an infinite loop when re-saving.
                         print(error)
+                    case .success(()):
+                        if self?.currentProfileStatus == .creating {
+                        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                                          let sceneDelegate = windowScene.delegate as? SceneDelegate, let window = sceneDelegate.window
+                                          else {
+                                              //MARK: TODO - handle could not swap root view controller
+                                              return
+                                      }
+                            
+                                      
+                                      //MARK: TODO - refactor this logic into scene delegate
+                                      UIView.transition(with: window, duration: 0.3, options: .transitionFlipFromBottom, animations: {
+                                          
+                                              window.rootViewController = TabBarController()
+                                          
+                                      }, completion: nil)
+                        } else {
+                            self?.dismiss(animated: true, completion: nil)
+                        }
                     }
                 }
-            }
+            case .failure(let error):
+                print(error)
+                
+        
+    }
         }
-    
-    
-    
+        }
    
     
     private func showAlert(with title: String, and message: String) {
