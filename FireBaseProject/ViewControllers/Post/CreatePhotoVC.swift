@@ -178,7 +178,7 @@ class CreatePhotoVC: UIViewController {
         configureUploadButtonConstraints()
         configureActivityIndicatorConstraints()
         
-        showAlert(with: "Message", and: "Double tab to set your image")
+        showAlert(with: "Message", and: "Tap Photo To Set Your Image")
     }
     private func presentPhotoPickerController() {
         DispatchQueue.main.async{
@@ -245,7 +245,14 @@ class CreatePhotoVC: UIViewController {
             newView.translatesAutoresizingMaskIntoConstraints = false
         }
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Logout", style: UIBarButtonItem.Style.plain, target: self, action: #selector(handleLogoutButton))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(title:"Edit Profile",style:UIBarButtonItem.Style.plain,target:self,action:#selector(editProfile))
     }
+    @objc public func editProfile() {
+           let profile = CreateProfileVC()
+           profile.currentProfile = Auth.auth().currentUser
+           profile.currentProfileStatus = .editing
+           present(profile,animated: true)
+       }
    private func storeImage(image:Data,destination:imageFolders) {
            FirebaseStorageService.manager.storeImage(image: image, destination: destination) { [weak self] (result) in
                switch result {
