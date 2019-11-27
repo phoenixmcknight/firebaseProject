@@ -58,6 +58,7 @@ class FeedViewController: UIViewController {
         configureFeedLabelConstraints()
         configureCollectionViewConstraints()
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Logout", style: UIBarButtonItem.Style.plain, target: self, action: #selector(handleLogoutButton))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(title:"Edit Profile",style:UIBarButtonItem.Style.plain,target:self,action:#selector(editProfile))
     }
     //MARK: Private Constraints function
     private func configureFeedLabelConstraints(){
@@ -93,6 +94,8 @@ class FeedViewController: UIViewController {
                 return
         }
         
+        
+        
         //MARK: TODO - refactor this logic into scene delegate
         UIView.transition(with: window, duration: 0.3, options: .transitionFlipFromBottom, animations: {
             
@@ -100,7 +103,12 @@ class FeedViewController: UIViewController {
             
         }, completion: nil)
     }
-    
+    @objc public func editProfile() {
+        let profile = CreateProfileVC()
+        profile.currentProfile = Auth.auth().currentUser
+        profile.currentProfileStatus = .editing
+        present(profile,animated: true)
+    }
 }
 extension FeedViewController: UICollectionViewDelegate{
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
