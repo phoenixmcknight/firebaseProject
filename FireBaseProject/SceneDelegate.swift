@@ -1,10 +1,3 @@
-//
-//  SceneDelegate.swift
-//  FireBaseProject
-//
-//  Created by Phoenix McKnight on 11/22/19.
-//  Copyright © 2019 Phoenix McKnight. All rights reserved.
-//
 
 import UIKit
 

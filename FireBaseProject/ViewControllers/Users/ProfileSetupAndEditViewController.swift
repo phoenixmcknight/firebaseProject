@@ -1,10 +1,3 @@
-//
-//  ProfileSetupViewController.swift
-//  firebae-reddit-clone
-//
-//  Created by David Rifkin on 11/13/19.
-//  Copyright © 2019 David Rifkin. All rights reserved.
-//
 
 import UIKit
 import Photos
@@ -40,7 +33,7 @@ class CreateProfileVC: UIViewController {
     }()
     
     lazy var emailAddress:UILabel = {
-        let ea = UILabel(font: UIFont(name: "Verdana-Bold", size: 12)!)
+        let ea = UILabel(font: UIFont(name: "Verdana-Bold", size: 24)!)
         
         return ea
     }()
@@ -61,11 +54,11 @@ class CreateProfileVC: UIViewController {
    lazy var profileImageView: UIImageView = {
     let guesture = UITapGestureRecognizer(target: self, action: #selector(imageAlert))
         
-        guesture.numberOfTapsRequired = 1
+//        guesture.numberOfTapsRequired = 1
         let imageView = UIImageView(frame: CGRect(x: 0, y: 0, width: self.view.bounds.width / 2, height: self.view.bounds.width / 2))
         imageView.backgroundColor = .black
         imageView.layer.borderWidth = 2
-        imageView.layer.borderColor = UIColor.white.cgColor
+        imageView.layer.borderColor = UIColor.black.cgColor
         imageView.layer.cornerRadius = imageView.frame.height / 2
         imageView.clipsToBounds = true
         imageView.image = UIImage(systemName: "photo")
@@ -79,7 +72,7 @@ class CreateProfileVC: UIViewController {
         button.setTitle("Create Profile", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = UIFont(name: "Verdana-Bold", size: 14)
-        button.backgroundColor = UIColor(red: 255/255, green: 67/255, blue: 0/255, alpha: 1)
+        button.backgroundColor = #colorLiteral(red: 0.2601475716, green: 0.2609100342, blue: 0.9169666171, alpha: 1)
         button.layer.cornerRadius = 5
         button.addTarget(self, action: #selector(savePressed), for: .touchUpInside)
         return button
@@ -88,7 +81,7 @@ class CreateProfileVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.view.backgroundColor = .gray
+        CustomLayer.shared.setGradientBackground(colorTop: .white, colorBottom: .lightGray, newView: view)
         addSubviews()
         setupViews()
         
@@ -262,7 +255,7 @@ self.storeImage(image: imageData, destination: .profileImages)
         alert.addTextField { (textField) in
             textField.placeholder = "Enter Display Name"
             textField.textAlignment = .center
-            textField.backgroundColor = .white
+            textField.backgroundColor = .clear
                    textField.borderStyle = .bezel
                    textField.layer.cornerRadius = 5
                    textField.autocorrectionType = .no

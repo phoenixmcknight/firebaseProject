@@ -1,10 +1,4 @@
 //
-//  SignUpViewController.swift
-//  FavoritePlaces
-//
-//  Created by C4Q on 11/20/19.
-//  Copyright © 2019 Iram Fattah. All rights reserved.
-//
 
 import UIKit
 import Firebase
@@ -18,7 +12,7 @@ class SignUpViewController: UIViewController {
           label.numberOfLines = 0
           label.text = "Sign Up"
           label.font = UIFont(name: "Verdana-Bold", size: 28)
-          label.textColor = UIColor(red: 255/255, green: 86/255, blue: 0/255, alpha: 1.0)
+          label.textColor = #colorLiteral(red: 0.2601475716, green: 0.2609100342, blue: 0.9169666171, alpha: 1)
           label.backgroundColor = .clear
           label.textAlignment = .center
           return label
@@ -52,7 +46,7 @@ class SignUpViewController: UIViewController {
           button.setTitle("Continue", for: .normal)
           button.setTitleColor(.white, for: .normal)
           button.titleLabel?.font = UIFont(name: "Verdana-Bold", size: 14)
-          button.backgroundColor = UIColor(red: 255/255, green: 67/255, blue: 0/255, alpha: 1)
+          button.backgroundColor = #colorLiteral(red: 0.2601475716, green: 0.2609100342, blue: 0.9169666171, alpha: 1)
           button.layer.cornerRadius = 5
           button.addTarget(self, action: #selector(trySignUp), for: .touchUpInside)
           button.isEnabled = false
@@ -63,7 +57,7 @@ class SignUpViewController: UIViewController {
       
       override func viewDidLoad() {
           super.viewDidLoad()
-          view.backgroundColor = UIColor(red: 198/255, green: 198/255, blue: 198/255, alpha: 1)
+        CustomLayer.shared.setGradientBackground(colorTop: .white, colorBottom: .lightGray, newView: view)
           setupHeaderLabel()
           setupCreateStackView()
 
@@ -74,12 +68,12 @@ class SignUpViewController: UIViewController {
       
       @objc func validateFields() {
              guard emailTextField.hasText, passwordTextField.hasText else {
-                 createButton.backgroundColor = UIColor(red: 255/255, green: 67/255, blue: 0/255, alpha: 0.5)
+                 createButton.backgroundColor = #colorLiteral(red: 0.2601475716, green: 0.2609100342, blue: 0.9169666171, alpha: 1)
                  createButton.isEnabled = false
                  return
              }
              createButton.isEnabled = true
-             createButton.backgroundColor = UIColor(red: 255/255, green: 67/255, blue: 0/255, alpha: 1)
+             createButton.backgroundColor = #colorLiteral(red: 0.2601475716, green: 0.2609100342, blue: 0.9169666171, alpha: 1)
          }
       
       @objc func trySignUp() {

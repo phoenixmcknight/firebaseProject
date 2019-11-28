@@ -1,10 +1,4 @@
-//
-//  FeedDetailVC.swift
-//  FireBaseProject
-//
-//  Created by Phoenix McKnight on 11/25/19.
-//  Copyright © 2019 Phoenix McKnight. All rights reserved.
-//
+
 
 import UIKit
 
@@ -25,6 +19,7 @@ class FeedDetailVC: UIViewController {
       lazy var userName:UILabel = {
           
           let rl = UILabel(font: UIFont(name: "Courier-Bold", size: 24.0)!)
+        rl.textColor = #colorLiteral(red: 0.2601475716, green: 0.2609100342, blue: 0.9169666171, alpha: 1)
           return rl
       }()
      
@@ -33,7 +28,7 @@ class FeedDetailVC: UIViewController {
           let atv = UITextView()
           atv.adjustsFontForContentSizeCategory = true
           atv.textAlignment = .center
-          atv.textColor = .black
+          atv.textColor = #colorLiteral(red: 0.2601475716, green: 0.2609100342, blue: 0.9169666171, alpha: 1)
           atv.backgroundColor = .clear
           atv.font = UIFont(name: "Courier-Bold", size: 24.0)
           atv.isEditable = false
@@ -58,8 +53,8 @@ class FeedDetailVC: UIViewController {
     }
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
-addSubviewsToView()
+        CustomLayer.shared.setGradientBackground(colorTop: .white, colorBottom: .lightGray, newView: view)
+        addSubviewsToView()
         configureTitleConstraints()
         configurefeedImageViewConstraints()
         configureDateLabel()

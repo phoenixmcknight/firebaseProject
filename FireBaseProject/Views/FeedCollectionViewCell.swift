@@ -31,6 +31,7 @@ class FeedCollectionViewCell: UICollectionViewCell {
         
         lazy var feedNameLabel:UILabel = {
             let vnl = UILabel(font: UIFont(name: "Courier-Bold", size: 12.0)!)
+            vnl.textColor = #colorLiteral(red: 0.2601475716, green: 0.2609100342, blue: 0.9169666171, alpha: 1)
             return vnl
         }()
         

@@ -1,10 +1,4 @@
-//
-//  FeedVC.swift
-//  FireBaseProject
-//
-//  Created by Phoenix McKnight on 11/25/19.
-//  Copyright © 2019 Phoenix McKnight. All rights reserved.
-//
+
 
 import Foundation
 import UIKit
@@ -37,8 +31,8 @@ class FeedViewController: UIViewController {
     lazy var feedLabel:UILabel = {
         let label = UILabel()
         label.textAlignment = .center
-        label.textColor = .black
-        label.font = UIFont(name: "Zapf Dingbats", size: 30)
+        label.textColor = #colorLiteral(red: 0.2601475716, green: 0.2609100342, blue: 0.9169666171, alpha: 1)
+        label.font = UIFont(name: "Verdana-Bold", size: 30)
         label.text = "Feed"
         return label
     }()
@@ -54,7 +48,7 @@ class FeedViewController: UIViewController {
     }
     
     private func setupView(){
-        view.backgroundColor = .white
+        CustomLayer.shared.setGradientBackground(colorTop: .white, colorBottom: .lightGray, newView: view)
         configureFeedLabelConstraints()
         configureCollectionViewConstraints()
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Logout", style: UIBarButtonItem.Style.plain, target: self, action: #selector(handleLogoutButton))

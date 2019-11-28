@@ -38,7 +38,7 @@ class CreatePhotoVC: UIViewController {
         
         let dtv = UITextView()
         dtv.textColor = .black
-        dtv.backgroundColor = .lightGray
+        dtv.backgroundColor = .clear
         dtv.textAlignment = .center
         dtv.font = UIFont(name: "Verdana-Bold", size: 16.0)!
         return dtv
@@ -169,7 +169,7 @@ class CreatePhotoVC: UIViewController {
     //MARK: private functions
     
     private func setupView(){
-        view.backgroundColor = .white
+        CustomLayer.shared.setGradientBackground(colorTop: .white, colorBottom: .lightGray, newView: view)
         addSubviewsToView()
         configureTitleLabelConstraints()
         configureTitleTextFieldConstraints()

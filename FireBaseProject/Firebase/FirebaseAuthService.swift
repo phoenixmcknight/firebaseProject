@@ -1,10 +1,3 @@
-//
-//  FirebaseAuthService.swift
-//  FavoritePlaces
-//
-//  Created by C4Q on 11/20/19.
-//  Copyright © 2019 Iram Fattah. All rights reserved.
-//
 
 import Foundation
 import FirebaseAuth
