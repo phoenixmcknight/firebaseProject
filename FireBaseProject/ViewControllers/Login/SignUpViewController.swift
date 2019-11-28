@@ -101,6 +101,7 @@ class SignUpViewController: UIViewController {
 let profileVC = CreateProfileVC()
         profileVC.emailAndPassword.0 = email
         profileVC.emailAndPassword.1 = password
+        profileVC.currentProfileStatus = .creating
        present(profileVC,animated: true)
         
         //             FirebaseAuthService.manager.createNewUser(email: email.lowercased(), password: password) { [weak self] (result) in
