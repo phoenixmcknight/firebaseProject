@@ -126,7 +126,7 @@ extension FeedViewController: UICollectionViewDataSource{
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: collectionIdentifiers.collectionCell.rawValue, for: indexPath) as? FeedCollectionViewCell else {return UICollectionViewCell()}
         let currentFeed = feeds[indexPath.item]
-        cell.feedNameLabel.text = currentFeed.username
+        cell.feedNameLabel.text = "User: \(currentFeed.username)"
         imageHandler(images: currentFeed.feedImage, currentCell: cell.feedImageView)
         
         CustomLayer.shared.createCustomlayer(layer: cell.layer, shadowOpacity: 0.5, borderWidth: 0)
