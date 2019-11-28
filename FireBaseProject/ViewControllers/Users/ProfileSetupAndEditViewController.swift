@@ -385,7 +385,6 @@ self.storeImage(image: imageData, destination: .profileImages)
                                        }
                                    }
                                    print(newResult)
-                                   self?.view.backgroundColor = .green
                                }
                            case .failure(let error):
                                self.showAlert(with: "Error creating user", and: "An Error Occured While Creating a New Account: \(error)")
