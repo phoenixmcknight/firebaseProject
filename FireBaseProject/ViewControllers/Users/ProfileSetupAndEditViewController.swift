@@ -18,7 +18,7 @@ class CreateProfileVC: UIViewController {
     
     var currentUser:Result<User,Error>? = nil
     
-    var currentProfileStatus:ProfileStatus = .creating
+    var currentProfileStatus:ProfileStatus!
     
     var currentProfile:User?
     
@@ -29,6 +29,15 @@ class CreateProfileVC: UIViewController {
     
     var imageURL: URL? = nil
     
+    lazy var postCount:UILabel = {
+        let pc = UILabel(font: UIFont(name: "Verdana-Bold", size: 36.0)!)
+        return pc
+    }()
+    
+    lazy var emailAddress:UILabel = {
+        let ea = UILabel(font: UIFont(name: "Verdana-Bold", size: 36.0)!)
+        return ea
+    }()
     
     lazy var displayName:UILabel = {
         let dn = UILabel(font: UIFont(name: "Verdana-Bold", size: 36.0)!)
@@ -61,7 +70,7 @@ class CreateProfileVC: UIViewController {
     
     lazy var saveButton: UIButton = {
         let button = UIButton()
-        button.setTitle("Save Profile", for: .normal)
+        button.setTitle("Create Profile", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = UIFont(name: "Verdana-Bold", size: 14)
         button.backgroundColor = UIColor(red: 255/255, green: 67/255, blue: 0/255, alpha: 1)
@@ -69,7 +78,7 @@ class CreateProfileVC: UIViewController {
         button.addTarget(self, action: #selector(savePressed), for: .touchUpInside)
         return button
     }()
-    lazy var viewArray = [self.profileImageView,self.displayName,self.saveButton,self.displayNameButton]
+    lazy var viewArray = [self.emailAddress,self.postCount,self.profileImageView,self.displayName,self.saveButton,self.displayNameButton]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -87,7 +96,7 @@ class CreateProfileVC: UIViewController {
             displayName.text = user.displayName
             imageHelperFunction(photoURL: user.photoURL?.absoluteString)
             imageURL = user.photoURL
-            saveButton.titleLabel?.text = "Save Edits"
+            saveButton.setTitle("Save Edits", for: .normal)
         }
     }
     
@@ -118,10 +127,12 @@ class CreateProfileVC: UIViewController {
         guard username != "Username" else {showAlert(with: "Invalid Username", and: "")
         return }
         
-        guard let image = imageURL else {
+        guard let image = imageURL, let imageData = profileImageView.image?.jpegData(compressionQuality: 0.7) else {
             showAlert(with: "Invalid Profile Picture", and: "")
             return
         }
+       
+        
          if currentProfileStatus == .creating {
         
         FirebaseAuthService.manager.createNewUser(email: emailAndPassword.0.lowercased().trimmingCharacters(in: .whitespacesAndNewlines), password: emailAndPassword.1.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)) { [weak self] (result) in
@@ -134,53 +145,18 @@ class CreateProfileVC: UIViewController {
             self?.handleCreateAccountResponse(with: result)
             
             }
-            profileInformation(username: username, photoURL: image)
+            updateCurrentUserAndUserFields(username: username, photoURL: image)
+             storeImage(image: imageData, destination: .profileImages)
         } else {
             
-            profileInformation(username:username , photoURL: image)
+            updateCurrentUserAndUserFields(username:username , photoURL: image)
         }
-//                FirestoreService.manager.updateCurrentUser(userName: username, photoURL: image) { [weak self] (nextResult) in
-//                    switch nextResult {
-//                    case .success():
-//
-//                        FirebaseAuthService.manager.updateUserFields(userName: username, photoURL: image) { (result) in
-//                            switch result {
-//                            case .failure(let error):
-//                                print(error)
-//                            case .success(()):
-//                                print("gotcha")
-//                                guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-//                                                  let sceneDelegate = windowScene.delegate as? SceneDelegate, let window = sceneDelegate.window
-//                                                  else {
-//                                                      //MARK: TODO - handle could not swap root view controller
-//                                                      return
-//                                              }
-//
-//                                              //MARK: TODO - refactor this logic into scene delegate
-//                                              UIView.transition(with: window, duration: 0.3, options: .transitionFlipFromBottom, animations: {
-//
-//                                                      window.rootViewController = TabBarController()
-//
-//                                              }, completion: nil)
-//                            }
-//                        }
-//                    case .failure(let error):
-//
-//                        //MARK: TODO - handle
-//
-//                        //Discussion - if can't update on user object in collection, our firestore object will not match what is in auth. should we:
-//                        // 1. Re-try the save?
-//                        // 2. Revert the changes on the auth user?
-//                        // This reconciliation should all be handled on the server side, but having to handle here, we could run into an infinite loop when re-saving.
-//                        print(error)
-//                    }
-//          //      }
-//                }
+  self.successfulProfileAlert(title: "Success", message: "Your Profile Information has Saved Successfully", profileStatus: self.currentProfileStatus)
             }
         
         
     
-    private func profileInformation(username:String,photoURL:URL) {
+    private func updateCurrentUserAndUserFields(username:String,photoURL:URL) {
         FirestoreService.manager.updateCurrentUser(userName: username, photoURL: photoURL) { [weak self] (nextResult) in
             switch nextResult {
             case .success():
@@ -190,32 +166,19 @@ class CreateProfileVC: UIViewController {
                     case .failure(let error):
                         print(error)
                     case .success(()):
-                        if self?.currentProfileStatus == .creating {
-                        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                                          let sceneDelegate = windowScene.delegate as? SceneDelegate, let window = sceneDelegate.window
-                                          else {
-                                              //MARK: TODO - handle could not swap root view controller
-                                              return
-                                      }
-                            
-                                      
-                                      //MARK: TODO - refactor this logic into scene delegate
-                                      UIView.transition(with: window, duration: 0.3, options: .transitionFlipFromBottom, animations: {
-                                          
-                                              window.rootViewController = TabBarController()
-                                          
-                                      }, completion: nil)
-                        } else {
-                            self?.dismiss(animated: true, completion: nil)
-                        }
+                        print("success")
+
+                        
                     }
                 }
+
+         
             case .failure(let error):
                 print(error)
                 
-        
+            }
     }
-        }
+        
         }
    
     
@@ -234,21 +197,44 @@ class CreateProfileVC: UIViewController {
         present(alertVC, animated: true, completion: nil)
     }
     
+    private func successfulProfileAlert(title:String,message:String,profileStatus:ProfileStatus?) {
+        guard let status = profileStatus else {return}
+        let alert = UIAlertController(title:title , message: message, preferredStyle: .alert)
+        
+        let response = UIAlertAction(title: "Ok", style: .default) { [weak self](action) in
+            switch status {
+                
+            case .creating:
+                 guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                                                         let sceneDelegate = windowScene.delegate as? SceneDelegate, let window = sceneDelegate.window
+                                                         else {
+                                                             //MARK: TODO - handle could not swap root view controller
+                                                             return
+                                                     }
+                                
+                                                     UIView.transition(with: window, duration: 0.3, options: .transitionFlipFromBottom, animations: {
+                                                         
+                                                             window.rootViewController = TabBarController()
+                                                         
+                                                     }, completion: nil)
+                                       
+            case .editing:
+                self?.dismiss(animated: true, completion: nil)
+            
+            }
+        }
+        alert.addAction(response)
+        present(alert,animated: true)
+    }
+    
    @objc private func imageAlert() {
         let alertVC = UIAlertController(title: "Profile Image", message: "", preferredStyle: .actionSheet)
         
-        let useDefaultImage = UIAlertAction(title: "Use Generic Image", style: .default) { (default) in
+        let useDefaultImage = UIAlertAction(title: "Use Generic Image", style: .default) { [weak self] (default) in
             guard let image = UIImage(systemName: "person.fill")?.jpegData(compressionQuality: 0.7) else {return}
-            self.profileImageView.image = UIImage(data: image)
+            self?.profileImageView.image = UIImage(data: image)
             
-            FirebaseStorageService.manager.storeImage(image:image,destination:.profileImages) { (result) in
-                switch result {
-                case .success(let url):
-                    self.imageURL = url
-                case .failure(let error):
-                    self.showAlert(with: "Could Not Save Image", and: "\(error)")
-                }
-            }
+            self?.storeImage(image: image, destination: .tempImages)
         }
         
         let useCustomImage = UIAlertAction(title: "Use Custom Image", style: .default) { (custom) in
@@ -395,16 +381,27 @@ extension CreateProfileVC: UIImagePickerControllerDelegate, UINavigationControll
             return
         }
         
-        FirebaseStorageService.manager.storeImage(image: imageData, destination: .profileImages, completion: { [weak self] (result) in
-            switch result{
-            case .success(let url):
-                //Note - defer UI response, update user image url in auth and in firestore when save is pressed
-                self?.imageURL = url
-            case .failure(let error):
-                //MARK: TODO - defer image not save alert, try again later. maybe make VC "dirty" to allow user to move on in nav stack
-                print(error)
-            }
-        })
+        storeImage(image: imageData, destination: .tempImages)
+//        FirebaseStorageService.manager.storeImage(image: imageData, destination: .profileImages, completion: { [weak self] (result) in
+//            switch result{
+//            case .success(let url):
+//                //Note - defer UI response, update user image url in auth and in firestore when save is pressed
+//                self?.imageURL = url
+//            case .failure(let error):
+//                //MARK: TODO - defer image not save alert, try again later. maybe make VC "dirty" to allow user to move on in nav stack
+//                print(error)
+//            }
+//        })
         dismiss(animated: true, completion: nil)
     }
+      private func storeImage(image:Data,destination:imageFolders) {
+             FirebaseStorageService.manager.storeImage(image: image, destination: destination) { [weak self] (result) in
+                 switch result {
+                 case .failure(let error):
+                     self?.showAlert(with: "Error", and: "\(error)")
+                 case .success(let url):
+                     self?.imageURL = url
+                 }
+             }
+         }
 }

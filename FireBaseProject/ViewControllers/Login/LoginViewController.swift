@@ -18,7 +18,7 @@ class LoginViewController: UIViewController {
               label.numberOfLines = 0
               label.text = "PursuitGram"
         label.adjustsFontSizeToFitWidth = true
-              label.font = UIFont(name: "Verdana-Bold", size: 60)
+              label.font = UIFont(name: "Verdana-Bold", size: 35)
               label.textColor = UIColor(red: 255/255, green: 86/255, blue: 0/255, alpha: 1.0)
               label.backgroundColor = .clear
               label.textAlignment = .center
