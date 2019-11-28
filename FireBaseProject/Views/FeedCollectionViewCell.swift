@@ -61,10 +61,9 @@ class FeedCollectionViewCell: UICollectionViewCell {
                 feedImageView.widthAnchor.constraint(equalToConstant: contentView.frame.width * 1),
                 
                 feedImageView.heightAnchor.constraint(equalToConstant: contentView.frame.height * 0.8),
-                feedNameLabel.topAnchor.constraint(equalTo: feedImageView.topAnchor,constant: 20),
+                feedNameLabel.topAnchor.constraint(equalTo: feedImageView.bottomAnchor,constant: 10),
                 feedNameLabel.leadingAnchor.constraint(equalTo: feedImageView.leadingAnchor,constant: 10),
                 feedNameLabel.trailingAnchor.constraint(equalTo: feedImageView.trailingAnchor,constant: -10),
-                feedNameLabel.bottomAnchor.constraint(equalTo: feedImageView.centerYAnchor,constant: 10)
                 //set label to bottom of imageview
                 //reuse detailVC for listVC
                 
