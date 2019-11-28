@@ -27,10 +27,15 @@ class CreateProfileVC: UIViewController {
     //MARK: TODO - edit other fields in this VC
     
     
-    var imageURL: URL? = nil
+    var imageURL: URL? = nil {
+        didSet {
+            print("got url")
+        }
+    }
     
     lazy var postCount:UILabel = {
         let pc = UILabel(font: UIFont(name: "Verdana-Bold", size: 36.0)!)
+        pc.isHidden = true
         return pc
     }()
     
@@ -92,14 +97,30 @@ class CreateProfileVC: UIViewController {
     override func viewWillAppear(_ animated:Bool) {
         super.viewWillAppear(animated)
         if currentProfileStatus == .editing {
+           
             guard let user = currentProfile else {return}
+            getPostsForThisUser()
             displayName.text = user.displayName
             imageHelperFunction(photoURL: user.photoURL?.absoluteString)
             imageURL = user.photoURL
+            postCount.isHidden = false
             saveButton.setTitle("Save Edits", for: .normal)
         }
     }
     
+    
+    private func getPostsForThisUser() {
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            FirestoreService.manager.getPosts(forUserID: self?.currentProfile?.uid ?? "") { (result) in
+                switch result {
+                case .success(let posts):
+                    self?.postCount.text = "Post Count : \(posts.count)"
+                case .failure(let error):
+                    print(":( \(error)")
+                }
+            }
+        }
+    }
     private func imageHelperFunction(photoURL:String?) {
         guard let url = photoURL else {return}
         ImageHelper.shared.getImage(urlStr: url) { [weak self](result) in
@@ -120,67 +141,51 @@ class CreateProfileVC: UIViewController {
     @objc private func savePressed(){
         
        
-            
         guard let username = displayName.text else {showAlert(with: "Invalid Username", and: "")
             return }
-        
-        guard username != "Username" else {showAlert(with: "Invalid Username", and: "")
+
+        guard username != "User Name" else {showAlert(with: "Invalid Username", and: "")
         return }
-        
-        guard let image = imageURL, let imageData = profileImageView.image?.jpegData(compressionQuality: 0.7) else {
+
+        guard let imageData = profileImageView.image?.jpegData(compressionQuality: 0.7), let photoURL = imageURL else {
             showAlert(with: "Invalid Profile Picture", and: "")
             return
         }
-       
-        
-         if currentProfileStatus == .creating {
-        
-        FirebaseAuthService.manager.createNewUser(email: emailAndPassword.0.lowercased().trimmingCharacters(in: .whitespacesAndNewlines), password: emailAndPassword.1.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)) { [weak self] (result) in
-       
-            self?.currentUser = result
+
+
+        switch currentProfileStatus {
+        case .creating:
+              FirebaseAuthService.manager.createNewUser(email: emailAndPassword.0.lowercased().trimmingCharacters(in: .whitespacesAndNewlines), password: emailAndPassword.1.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)) { [weak self] (result) in
+
+                        self?.currentUser = result
+
+                        guard self?.currentUser != nil else {self?.showAlert(with: "Could Not Create Account", and: "")
+                        return}
             
-            guard self?.currentUser != nil else {self?.showAlert(with: "Could Not Create Account", and: "")
-            return}
-            
-            self?.handleCreateAccountResponse(with: result)
-            
-            }
-            updateCurrentUserAndUserFields(username: username, photoURL: image)
-             storeImage(image: imageData, destination: .profileImages)
-        } else {
-            
-            updateCurrentUserAndUserFields(username:username , photoURL: image)
+                        self?.handleCreateAccountResponse(with: result)
+                        
+                        }
+        case .editing:
+            handleUpdateAccountResponse(username: username, photoURL: photoURL)
+        case .none:
+            print("error")
         }
-  self.successfulProfileAlert(title: "Success", message: "Your Profile Information has Saved Successfully", profileStatus: self.currentProfileStatus)
+self.storeImage(image: imageData, destination: .profileImages)
+//        FirebaseAuthService.manager.createNewUser(email: emailAndPassword.0.lowercased().trimmingCharacters(in: .whitespacesAndNewlines), password: emailAndPassword.1.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)) { [weak self] (result) in
+//
+//            self?.currentUser = result
+//
+//            guard self?.currentUser != nil else {self?.showAlert(with: "Could Not Create Account", and: "")
+//            return}
+//self?.storeImage(image: imageData, destination: .profileImages)
+//            self?.handleCreateAccountResponse(with: result)
+//
+//            }
             }
         
         
     
-    private func updateCurrentUserAndUserFields(username:String,photoURL:URL) {
-        FirestoreService.manager.updateCurrentUser(userName: username, photoURL: photoURL) { [weak self] (nextResult) in
-            switch nextResult {
-            case .success():
-
-                FirebaseAuthService.manager.updateUserFields(userName: username, photoURL: photoURL) { (result) in
-                    switch result {
-                    case .failure(let error):
-                        print(error)
-                    case .success(()):
-                        print("success")
-
-                        
-                    }
-                }
-
-         
-            case .failure(let error):
-                print(error)
-                
-            }
-    }
-        
-        }
-   
+    
     
     private func showAlert(with title: String, and message: String) {
         let alertVC = UIAlertController(title: title, message: message, preferredStyle: .alert)
@@ -297,6 +302,22 @@ class CreateProfileVC: UIViewController {
         displayNameButtonConstraints()
     }
     
+    private func setUpEmailAddress() {
+        NSLayoutConstraint.activate([
+            emailAddress.topAnchor.constraint(equalTo: profileImageView.topAnchor),
+            emailAddress.centerXAnchor.constraint(equalTo: profileImageView.centerXAnchor),
+            emailAddress.heightAnchor.constraint(equalToConstant: 50)
+        ])
+    }
+    
+    private func setUpPostCount() {
+        NSLayoutConstraint.activate([
+        postCount.topAnchor.constraint(equalTo: emailAddress.topAnchor,constant: 20),
+                  postCount.centerXAnchor.constraint(equalTo: profileImageView.centerXAnchor),
+                  postCount.heightAnchor.constraint(equalToConstant: 50)
+        ])
+    }
+    
     private func setupImageView() {
        
         NSLayoutConstraint.activate([
@@ -307,23 +328,65 @@ class CreateProfileVC: UIViewController {
         ])
     }
     
-
-        
-        private func handleCreateAccountResponse(with result: Result<User, Error>)  {
-                
-                    switch result {
-                    case .success(let user):
-                        FirestoreService.manager.createAppUser(user: AppUser(from: user)) { [weak self] newResult in
-                      
-                            print(newResult)
-                        }
+    private func handleUpdateAccountResponse(username:String, photoURL:URL) {
+        FirestoreService.manager.updateCurrentUser(userName: username, photoURL: photoURL) { [weak self] (result) in
+            switch result {
+            case .failure(let error):
+                self?.showAlert(with: "Error Updating Account Information", and: error.localizedDescription)
+            case .success():
+                FirebaseAuthService.manager.updateUserFields(userName: username, photoURL: photoURL) {  [weak self](nextResult) in
+                    switch nextResult {
                     case .failure(let error):
-                        self.showErrorAlert(with: "Error creating user", and: "\(error)")
-                       
+                        print(error)
+                    case .success():
+                        self?.successfulProfileAlert(title: "Successfully Saved Profile Changes", message: "", profileStatus: .editing)
                     }
-                
+                 
+                }
             }
+        }
+    }
         
+        
+                    private func handleCreateAccountResponse(with result: Result<User, Error>) {
+                           //    DispatchQueue.main.async { [weak self] in
+                           switch result {
+                           case .success(let user):
+                               FirestoreService.manager.createAppUser(user: AppUser(from: user)) { [weak self] newResult in
+                                   guard FirebaseAuthService.manager.currentUser != nil else {
+                                    self?.showAlert(with: "Error Creating User", and: "")
+                                       return
+                                   }
+                                   
+                                   
+                                FirestoreService.manager.updateCurrentUser(userName: self?.displayName.text, photoURL: self?.imageURL) { [weak self] (nextResult) in
+                                       switch nextResult {
+                                       case .success():
+                                        FirebaseAuthService.manager.updateUserFields(userName: self?.displayName.text, photoURL: self?.imageURL) { (updateUser) in
+                               
+                                               switch updateUser{
+                                               case .failure(let error):
+                                                self?.showAlert(with: "Error", and: error.localizedDescription)
+                                               case .success():
+                                                  self?.successfulProfileAlert(title: "Success", message: "Your Profile Information has Saved Successfully", profileStatus: self?.currentProfileStatus)
+                                               }
+                                           }
+                                          
+                                           print(self?.imageURL?.absoluteString)
+                                       case .failure(let error):
+                                           self?.showAlert(with: "Error", and: "Error Creating User. Please Try Again")
+                                           
+                                           print(error)
+                                           return
+                                       }
+                                   }
+                                   print(newResult)
+                                   self?.view.backgroundColor = .green
+                               }
+                           case .failure(let error):
+                               self.showAlert(with: "Error creating user", and: "An Error Occured While Creating a New Account: \(error)")
+                           }
+                       }
 
 
 

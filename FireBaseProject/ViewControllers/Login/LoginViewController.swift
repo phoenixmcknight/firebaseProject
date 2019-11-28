@@ -142,8 +142,8 @@ class LoginViewController: UIViewController {
                
                UIView.transition(with: window, duration: 0.3, options: .transitionFlipFromBottom, animations: {
                    if FirebaseAuthService.manager.currentUser != nil {
-//                       window.rootViewController = MainMapViewController()
-//
+                       window.rootViewController = TabBarController()
+
                    } else {
                        print("No current user")
                    }
