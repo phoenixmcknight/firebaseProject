@@ -103,6 +103,7 @@ let profileVC = CreateProfileVC()
         profileVC.emailAndPassword.1 = password
         profileVC.currentProfileStatus = .creating
         profileVC.postCount.isHidden = true
+        profileVC.emailAddress.text = email
        present(profileVC,animated: true)
         
         //             FirebaseAuthService.manager.createNewUser(email: email.lowercased(), password: password) { [weak self] (result) in

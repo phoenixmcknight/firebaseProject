@@ -40,7 +40,8 @@ class CreateProfileVC: UIViewController {
     }()
     
     lazy var emailAddress:UILabel = {
-        let ea = UILabel(font: UIFont(name: "Verdana-Bold", size: 36.0)!)
+        let ea = UILabel(font: UIFont(name: "Verdana-Bold", size: 12)!)
+        
         return ea
     }()
     
@@ -105,6 +106,7 @@ class CreateProfileVC: UIViewController {
             imageURL = user.photoURL
             postCount.isHidden = false
             saveButton.setTitle("Save Edits", for: .normal)
+            emailAddress.text = Auth.auth().currentUser?.email
         }
     }
     
@@ -298,13 +300,15 @@ self.storeImage(image: imageData, destination: .profileImages)
     private func setupViews() {
         setupImageView()
         setupSaveButton()
+         setUpPostCount()
+        setUpEmailAddress()
      displayNameConstraints()
         displayNameButtonConstraints()
     }
     
     private func setUpEmailAddress() {
         NSLayoutConstraint.activate([
-            emailAddress.topAnchor.constraint(equalTo: profileImageView.topAnchor),
+            emailAddress.topAnchor.constraint(equalTo: postCount.bottomAnchor, constant:  20),
             emailAddress.centerXAnchor.constraint(equalTo: profileImageView.centerXAnchor),
             emailAddress.heightAnchor.constraint(equalToConstant: 50)
         ])
@@ -312,7 +316,7 @@ self.storeImage(image: imageData, destination: .profileImages)
     
     private func setUpPostCount() {
         NSLayoutConstraint.activate([
-        postCount.topAnchor.constraint(equalTo: emailAddress.topAnchor,constant: 20),
+        postCount.topAnchor.constraint(equalTo: view.topAnchor,constant: 20),
                   postCount.centerXAnchor.constraint(equalTo: profileImageView.centerXAnchor),
                   postCount.heightAnchor.constraint(equalToConstant: 50)
         ])
