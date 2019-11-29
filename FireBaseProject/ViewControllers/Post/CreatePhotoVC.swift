@@ -205,7 +205,7 @@ successfulImageSaved(with: "Success!", and: "Saved Photo")
         configureUploadButtonConstraints()
         configureActivityIndicatorConstraints()
         
-        showAlert(with: "Message", and: "Tap Photo To Set Your Image")
+        showAlert(with: "Tap Photo To Set Image", and: "")
     }
     
     private func storeImage(image:Data,destination:imageFolders) {
