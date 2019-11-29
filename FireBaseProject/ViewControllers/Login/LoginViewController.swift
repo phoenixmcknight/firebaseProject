@@ -82,9 +82,7 @@ class LoginViewController: UIViewController {
         super.viewDidLoad()
         CustomLayer.shared.setGradientBackground(colorTop: .white, colorBottom: .lightGray, newView: view)
         setupSubViews()
-        addKeyBoardHandlingObservers()
-        
-        // Do any additional setup after loading the view.
+        addKeyBoardObservers()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -94,26 +92,26 @@ class LoginViewController: UIViewController {
     
     //MARK: Objc C methods
     
-    @objc func handleKeyBoardShowing(sender notification:Notification){
-             guard let infoDict = notification.userInfo else {return}
-             guard let keyboardFreme = infoDict[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else {return}
-             guard let duration = infoDict[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else {return}
-             
-             self.containerViewBottomConstraint.constant = -10 - (keyboardFreme.height)
-             self.containerViewTopConstraint.constant = 500 - (keyboardFreme.height)
-             
-             UIView.animate(withDuration: duration) {
-                 self.view.layoutIfNeeded()
-             }
-         }
-         
+    @objc func keyBoardAppears(sender notification:Notification){
+        guard let infoDict = notification.userInfo else {return}
+        guard let keyboardFreme = infoDict[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else {return}
+        guard let duration = infoDict[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else {return}
+        
+        self.containerViewBottomConstraint.constant = -10 - (keyboardFreme.height)
+        self.containerViewTopConstraint.constant = 500 - (keyboardFreme.height)
+        
+        UIView.animate(withDuration: duration) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
     @objc func handleKeyBoardHiding(sender notification:Notification){
         guard let infoDict = notification.userInfo else {return}
         guard let duration = infoDict[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else {return}
         
         self.containerViewBottomConstraint.constant = -10
         self.containerViewTopConstraint.constant = 500
-      
+        
         UIView.animate(withDuration: duration) {
             self.view.layoutIfNeeded()
         }
@@ -161,8 +159,8 @@ class LoginViewController: UIViewController {
     
     //MARK: Private methods
     
-    private func addKeyBoardHandlingObservers(){
-        NotificationCenter.default.addObserver(self, selector: #selector(handleKeyBoardShowing(sender:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+    private func addKeyBoardObservers(){
+        NotificationCenter.default.addObserver(self, selector: #selector(keyBoardAppears(sender:)), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleKeyBoardHiding(sender:)), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
@@ -191,7 +189,7 @@ class LoginViewController: UIViewController {
         }
     }
     
-    
+    //MARK:Alerts
     
     private func showAlert(with title: String, and message: String) {
         let alertVC = UIAlertController(title: title, message: message, preferredStyle: .alert)

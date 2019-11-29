@@ -12,6 +12,7 @@ import Photos
 import FirebaseAuth
 class CreatePhotoVC: UIViewController {
     
+    //MARK: Variables
     
     var image = UIImage() {
         didSet {
@@ -26,7 +27,7 @@ class CreatePhotoVC: UIViewController {
     lazy var uploadImage:UIImageView = {
         let image = UIImageView()
         CustomLayer.shared.createCustomlayer(layer: image.layer, shadowOpacity: 0.5,borderWidth:0)
-        let guesture = UITapGestureRecognizer(target: self, action: #selector(imageViewDoubleTapped(sender:)))
+        let guesture = UITapGestureRecognizer(target: self, action: #selector(imageViewTapped(sender:)))
         guesture.numberOfTapsRequired = 1
         image.image = UIImage(systemName: "photo")
         image.isUserInteractionEnabled = true
@@ -46,9 +47,9 @@ class CreatePhotoVC: UIViewController {
     lazy var titleTextField:UITextField = {
         let ttf = UITextField()
         ttf.placeholder = "Enter Title"
-              ttf.textAlignment = .center
-              ttf.textColor = .black
-              ttf.borderStyle = .roundedRect
+        ttf.textAlignment = .center
+        ttf.textColor = .black
+        ttf.borderStyle = .roundedRect
         return ttf
     }()
     lazy var uploadButton: UIButton = {
@@ -88,62 +89,47 @@ class CreatePhotoVC: UIViewController {
         super.viewDidLoad()
         setupView()
     }
-    //MARK:-- @objc function
-       @objc func handleUpdateButton() {
+    //MARK: Objc function
+    @objc func handleUpdateButton() {
         
         guard let user = FirebaseAuthService.manager.currentUser, let displayName = user.displayName else {
-                   showAlert(with: "Warning", and: "You Must Have a Profile and Username to Create a Post")
-                   return
-               }
+            showAlert(with: "Warning", and: "You Must Have a Profile and Username to Create a Post")
+            return
+        }
         
         guard let title = titleTextField.text, title != "", let body = descriptionTextView.text, body != "" else {
-                    showAlert(with: "Error", and: "All fields must be filled")
-                    return
-                }
+            showAlert(with: "Error", and: "All fields must be filled")
+            return
+        }
         
         guard uploadImage.image != UIImage(systemName: "photo") else {
             showAlert(with: "Warning", and: "Please Add a New Image")
             return
         }
-      
+        
         guard let image = uploadImage.image?.jpegData(compressionQuality: 0.7) else {
             showAlert(with: "Error", and: "Error Adding Picture, Please Try Again")
             return
         }
         storeImage(image: image, destination: .postImages)
-       
-       
-            
-            guard let url = self.imageURL else {
-                self.showAlert(with: "Error", and: "Error Adding Picture, Please Try Again")
-                   return
-               }
-            
-            let newPost = Post(feedImage: url.absoluteString, creatorID: user.uid, title: title, body: body, username: displayName)
-       
         
-         FirestoreService.manager.createPost(post: newPost) { (result) in
-             self.handlePostResponse(withResult: result)
-            
-            }
-     }
-    private func handlePostResponse(withResult result: Result<Void, Error>) {
-    switch result {
-    case .success:
-        let alertVC = UIAlertController(title: "Successfully Added Post", message: "New post was added", preferredStyle: .alert)
         
-        alertVC.addAction(UIAlertAction(title: "OK", style: .cancel, handler: { [weak self] (action)  in
-            DispatchQueue.main.async {
-                self?.navigationController?.popViewController(animated: true)
-            }
-            
-        }))
-    case .failure(let error):
-        showAlert(with: "Error Posting Image", and: "\(error)")
         
+        guard let url = self.imageURL else {
+            self.showAlert(with: "Error", and: "Error Adding Picture, Please Try Again")
+            return
+        }
+        
+        let newPost = Post(feedImage: url.absoluteString, creatorID: user.uid, title: title, body: body, username: displayName)
+        
+        
+        FirestoreService.manager.createPost(post: newPost) { (result) in
+            self.handlePostResponse(withResult: result)
+            
         }
     }
-    @objc private func imageViewDoubleTapped(sender:UITapGestureRecognizer) {
+    
+    @objc private func imageViewTapped(sender:UITapGestureRecognizer) {
         print("pressed")
         //MARK: TODO - action sheet with multiple media options
         activityIndicator.startAnimating()
@@ -166,7 +152,52 @@ class CreatePhotoVC: UIViewController {
         }
     }
     
-    //MARK: private functions
+    @objc func handleLogoutButton(){
+        try?  Auth.auth().signOut()
+        
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+            let sceneDelegate = windowScene.delegate as? SceneDelegate, let window = sceneDelegate.window
+            else {
+                //MARK: TODO - handle could not swap root view controller
+                return
+        }
+        
+        //MARK: TODO - refactor this logic into scene delegate
+        UIView.transition(with: window, duration: 0.3, options: .transitionFlipFromBottom, animations: {
+            
+            window.rootViewController = LoginViewController()
+            
+        }, completion: nil)
+    }
+    
+    @objc public func editProfile() {
+        let profile = CreateProfileVC()
+        profile.currentProfile = Auth.auth().currentUser
+        profile.currentProfileStatus = .editing
+        present(profile,animated: true)
+    }
+    
+    //MARK: Private Functions
+    
+    private func handlePostResponse(withResult result: Result<Void, Error>) {
+        switch result {
+        case .success:
+            let alertVC = UIAlertController(title: "Successfully Added Post", message: "New post was added", preferredStyle: .alert)
+            
+            alertVC.addAction(UIAlertAction(title: "OK", style: .cancel, handler: { [weak self] (action)  in
+                DispatchQueue.main.async {
+                    self?.navigationController?.popViewController(animated: true)
+                }
+                
+            }))
+        case .failure(let error):
+            showAlert(with: "Error Posting Image", and: "\(error)")
+            
+        }
+    }
+    
+    
+    //MARK: Private Functions
     
     private func setupView(){
         CustomLayer.shared.setGradientBackground(colorTop: .white, colorBottom: .lightGray, newView: view)
@@ -180,6 +211,20 @@ class CreatePhotoVC: UIViewController {
         
         showAlert(with: "Message", and: "Tap Photo To Set Your Image")
     }
+    
+    private func storeImage(image:Data,destination:imageFolders) {
+        FirebaseStorageService.manager.storeImage(image: image, destination: destination) { [weak self] (result) in
+            switch result {
+            case .failure(let error):
+                self?.showAlert(with: "Error", and: "\(error)")
+            case .success(let url):
+                self?.imageURL = url
+                
+                
+            }
+        }
+    }
+    
     private func presentPhotoPickerController() {
         DispatchQueue.main.async{
             let imagePickerViewController = UIImagePickerController()
@@ -200,7 +245,7 @@ class CreatePhotoVC: UIViewController {
     //MARK: private constraints
     
     private func configureTitleLabelConstraints(){
-       
+        
         NSLayoutConstraint.activate([titleLabel.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor), titleLabel.leadingAnchor.constraint(equalTo: self.view.leadingAnchor), titleLabel.trailingAnchor.constraint(equalTo: self.view.trailingAnchor), titleLabel.heightAnchor.constraint(equalToConstant: 150)])
     }
     
@@ -214,8 +259,10 @@ class CreatePhotoVC: UIViewController {
         ])
     }
     
+    //MARK:UIObject Constraints
+    
     private func configureUploadImageConstraints(){
-       
+        
         NSLayoutConstraint.activate([uploadImage.topAnchor.constraint(equalTo: self.titleLabel.bottomAnchor), uploadImage.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 30), uploadImage.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -30), uploadImage.heightAnchor.constraint(equalToConstant: 300)])
     }
     
@@ -247,43 +294,9 @@ class CreatePhotoVC: UIViewController {
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Logout", style: UIBarButtonItem.Style.plain, target: self, action: #selector(handleLogoutButton))
         navigationItem.leftBarButtonItem = UIBarButtonItem(title:"Edit Profile",style:UIBarButtonItem.Style.plain,target:self,action:#selector(editProfile))
     }
-    @objc public func editProfile() {
-           let profile = CreateProfileVC()
-           profile.currentProfile = Auth.auth().currentUser
-           profile.currentProfileStatus = .editing
-           present(profile,animated: true)
-       }
-   private func storeImage(image:Data,destination:imageFolders) {
-           FirebaseStorageService.manager.storeImage(image: image, destination: destination) { [weak self] (result) in
-               switch result {
-               case .failure(let error):
-                   self?.showAlert(with: "Error", and: "\(error)")
-               case .success(let url):
-                   self?.imageURL = url
-                   
-                   
-               }
-           }
-       }
-    @objc func handleLogoutButton(){
-          try?  Auth.auth().signOut()
-    //        let loginVC = LoginViewController()
-    //        loginVC.modalPresentationStyle = .fullScreen
-    //        present(loginVC, animated: true, completion: nil)
-            guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                let sceneDelegate = windowScene.delegate as? SceneDelegate, let window = sceneDelegate.window
-                else {
-                    //MARK: TODO - handle could not swap root view controller
-                    return
-            }
-            
-            //MARK: TODO - refactor this logic into scene delegate
-            UIView.transition(with: window, duration: 0.3, options: .transitionFlipFromBottom, animations: {
-                
-                    window.rootViewController = LoginViewController()
-                
-            }, completion: nil)
-        }
+    
+    
+    
 }
 extension CreatePhotoVC:UIImagePickerControllerDelegate, UINavigationControllerDelegate{
     
@@ -298,7 +311,7 @@ extension CreatePhotoVC:UIImagePickerControllerDelegate, UINavigationControllerD
         self.activityIndicator.stopAnimating()
         picker.dismiss(animated: true, completion: nil)
     }
-   
+    
 }
 
 

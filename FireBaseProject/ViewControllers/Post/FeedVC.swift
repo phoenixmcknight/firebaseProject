@@ -5,10 +5,14 @@ import UIKit
 import FirebaseAuth
 
 class FeedViewController: UIViewController {
-    // enum
+    
+    //MARK: Enums
+    
     enum collectionIdentifiers:String{
         case collectionCell
     }
+    
+    //MARK:Variables
     
     var feeds = [Post](){
         didSet{
@@ -19,6 +23,7 @@ class FeedViewController: UIViewController {
     lazy var collectionView:UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
+        layout.itemSize = CGSize(width: 150, height: 150)
         let cv = UICollectionView(frame: CGRect.zero, collectionViewLayout: layout)
         cv.backgroundColor = .clear
         cv.register(FeedCollectionViewCell.self, forCellWithReuseIdentifier: collectionIdentifiers.collectionCell.rawValue)
@@ -37,6 +42,8 @@ class FeedViewController: UIViewController {
         return label
     }()
     
+    //MARK:Lifecycles
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
@@ -47,6 +54,9 @@ class FeedViewController: UIViewController {
         loadData()
     }
     
+    
+    //MARK: Private Constraints function
+    
     private func setupView(){
         CustomLayer.shared.setGradientBackground(colorTop: .white, colorBottom: .lightGray, newView: view)
         configureFeedLabelConstraints()
@@ -54,7 +64,6 @@ class FeedViewController: UIViewController {
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Logout", style: UIBarButtonItem.Style.plain, target: self, action: #selector(handleLogoutButton))
         navigationItem.leftBarButtonItem = UIBarButtonItem(title:"Edit Profile",style:UIBarButtonItem.Style.plain,target:self,action:#selector(editProfile))
     }
-    //MARK: Private Constraints function
     private func configureFeedLabelConstraints(){
         self.view.addSubview(feedLabel)
         feedLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -67,8 +76,9 @@ class FeedViewController: UIViewController {
         NSLayoutConstraint.activate([collectionView.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor), collectionView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 5), collectionView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -5),collectionView.topAnchor.constraint(equalTo: self.feedLabel.bottomAnchor)])
     }
     
+    //MARK: Private Functions
     private func loadData() {
-         FirestoreService.manager.getAllPosts(sortingCriteria: .fromNewestToOldest) { (result) in
+        FirestoreService.manager.getAllPosts(sortingCriteria: .fromNewestToOldest) { (result) in
             switch result {
             case .failure(let error):
                 print(error)
@@ -78,9 +88,11 @@ class FeedViewController: UIViewController {
         }
     }
     
+    //MARK: Objc functions
+    
     @objc func handleLogoutButton(){
-      try?  Auth.auth().signOut()
-
+        try?  Auth.auth().signOut()
+        
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
             let sceneDelegate = windowScene.delegate as? SceneDelegate, let window = sceneDelegate.window
             else {
@@ -90,10 +102,9 @@ class FeedViewController: UIViewController {
         
         
         
-        //MARK: TODO - refactor this logic into scene delegate
         UIView.transition(with: window, duration: 0.3, options: .transitionFlipFromBottom, animations: {
             
-                window.rootViewController = LoginViewController()
+            window.rootViewController = LoginViewController()
             
         }, completion: nil)
     }
@@ -131,25 +142,18 @@ extension FeedViewController: UICollectionViewDataSource{
         ImageHelper.shared.getImage(urlStr: images) { [weak self] (result) in
             DispatchQueue.main.async {
                 
-            
-            switch result {
                 
-            case .failure(let error):
-                print(error.localizedDescription)
-                currentCell.image = UIImage(systemName: "photo")
-            case .success(let uiImage):
-                currentCell.image = uiImage
-            }
+                switch result {
+                    
+                case .failure(let error):
+                    print(error.localizedDescription)
+                    currentCell.image = UIImage(systemName: "photo")
+                case .success(let uiImage):
+                    currentCell.image = uiImage
+                }
             }
         }
-    
-}
-}
-extension FeedViewController: UICollectionViewDelegateFlowLayout{
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
-        let verticalCellCGSize = CGSize(width: 170, height: 170)
-        return verticalCellCGSize
     }
 }
 
