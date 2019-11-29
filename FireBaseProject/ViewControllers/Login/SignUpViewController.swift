@@ -45,7 +45,7 @@ class SignUpViewController: UIViewController {
         textField.backgroundColor = .white
         textField.borderStyle = .bezel
         textField.autocorrectionType = .no
-        textField.isSecureTextEntry = true
+       // textField.isSecureTextEntry = true
         textField.addTarget(self, action: #selector(validateFields), for: .editingChanged)
         return textField
     }()
