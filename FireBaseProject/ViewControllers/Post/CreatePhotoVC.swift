@@ -42,6 +42,8 @@ class CreatePhotoVC: UIViewController {
         dtv.backgroundColor = .clear
         dtv.textAlignment = .center
         dtv.font = UIFont(name: "Verdana-Bold", size: 16.0)!
+        CustomLayer.shared.createCustomlayer(layer: dtv.layer, shadowOpacity: 0.5, borderWidth: 1.0)
+    
         return dtv
     }()
     lazy var titleTextField:UITextField = {
@@ -50,11 +52,12 @@ class CreatePhotoVC: UIViewController {
         ttf.textAlignment = .center
         ttf.textColor = .black
         ttf.borderStyle = .roundedRect
+        ttf.backgroundColor = .clear
         return ttf
     }()
     lazy var uploadButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Upload", for: .normal)
+        button.setTitle("Upload Photo", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = UIFont(name: "Verdana-Bold", size: 14)
         button.backgroundColor = #colorLiteral(red: 0.2601475716, green: 0.2609100342, blue: 0.9169666171, alpha: 1)
@@ -125,7 +128,6 @@ class CreatePhotoVC: UIViewController {
         
         FirestoreService.manager.createPost(post: newPost) { (result) in
             self.handlePostResponse(withResult: result)
-            
         }
     }
     
@@ -179,17 +181,11 @@ class CreatePhotoVC: UIViewController {
     
     //MARK: Private Functions
     
-    private func handlePostResponse(withResult result: Result<Void, Error>) {
+    private func handlePostResponse(withResult result: Result<Void, Error>)  {
         switch result {
         case .success:
-            let alertVC = UIAlertController(title: "Successfully Added Post", message: "New post was added", preferredStyle: .alert)
-            
-            alertVC.addAction(UIAlertAction(title: "OK", style: .cancel, handler: { [weak self] (action)  in
-                DispatchQueue.main.async {
-                    self?.navigationController?.popViewController(animated: true)
-                }
-                
-            }))
+           
+successfulImageSaved(with: "Success!", and: "Saved Photo")
         case .failure(let error):
             showAlert(with: "Error Posting Image", and: "\(error)")
             
@@ -232,38 +228,48 @@ class CreatePhotoVC: UIViewController {
             imagePickerViewController.sourceType = .photoLibrary
             imagePickerViewController.allowsEditing = true
             imagePickerViewController.mediaTypes = ["public.image", "public.movie"]
-            self.present(imagePickerViewController, animated: true, completion: nil)
+            self.present(imagePickerViewController, animated: true,completion: nil)
         }
     }
-    
+    //MARK: Alerts
     private func showAlert(with title: String, and message: String) {
         let alertVC = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alertVC.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
         present(alertVC, animated: true, completion: nil)
     }
     
-    //MARK: private constraints
+    private func successfulImageSaved(with title: String, and message: String) {
+           let alertVC = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        
+        alertVC.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action) in
+            self.navigationController?.pushViewController(FeedViewController(), animated: true)
+        }))
+           
+           present(alertVC, animated: true, completion: nil)
+       }
+    
+    //MARK:UIObject Constraints
     
     private func configureTitleLabelConstraints(){
         
-        NSLayoutConstraint.activate([titleLabel.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor), titleLabel.leadingAnchor.constraint(equalTo: self.view.leadingAnchor), titleLabel.trailingAnchor.constraint(equalTo: self.view.trailingAnchor), titleLabel.heightAnchor.constraint(equalToConstant: 150)])
+        NSLayoutConstraint.activate([titleLabel.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor), titleLabel.leadingAnchor.constraint(equalTo: self.view.leadingAnchor), titleLabel.trailingAnchor.constraint(equalTo: self.view.trailingAnchor), titleLabel.heightAnchor.constraint(equalToConstant: 100)])
     }
     
     private func configureTitleTextFieldConstraints() {
         
         NSLayoutConstraint.activate([
-            titleTextField.bottomAnchor.constraint(equalTo:uploadImage.topAnchor,constant: -5),
+            titleTextField.topAnchor.constraint(equalTo:titleLabel.bottomAnchor,constant: 10),
             titleTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor,constant: 10),
             titleTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor,constant: -10),
             titleTextField.heightAnchor.constraint(equalToConstant: 50)
         ])
     }
     
-    //MARK:UIObject Constraints
+   
     
     private func configureUploadImageConstraints(){
         
-        NSLayoutConstraint.activate([uploadImage.topAnchor.constraint(equalTo: self.titleLabel.bottomAnchor), uploadImage.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 30), uploadImage.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -30), uploadImage.heightAnchor.constraint(equalToConstant: 300)])
+        NSLayoutConstraint.activate([uploadImage.topAnchor.constraint(equalTo: self.titleTextField.bottomAnchor), uploadImage.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 30), uploadImage.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -30), uploadImage.heightAnchor.constraint(equalToConstant: 300)])
     }
     
     private func configureTextViewConstraints() {
@@ -271,7 +277,7 @@ class CreatePhotoVC: UIViewController {
             descriptionTextView.topAnchor.constraint(equalTo: uploadImage.bottomAnchor,constant: 10),
             descriptionTextView.leadingAnchor.constraint(equalTo: view.leadingAnchor,constant: 10),
             descriptionTextView.trailingAnchor.constraint(equalTo: view.trailingAnchor,constant: -10),
-            descriptionTextView.bottomAnchor.constraint(equalTo: uploadButton.topAnchor)
+            descriptionTextView.bottomAnchor.constraint(equalTo: uploadButton.topAnchor,constant: -10)
         ])
     }
     
@@ -313,7 +319,6 @@ extension CreatePhotoVC:UIImagePickerControllerDelegate, UINavigationControllerD
     }
     
 }
-
 
 
 
