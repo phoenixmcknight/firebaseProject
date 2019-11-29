@@ -51,6 +51,13 @@ class LoginViewController: UIViewController {
         return textField
     }()
     
+    lazy var pursuitImage:UIImageView = {
+        let pi = UIImageView()
+        pi.image = UIImage(named: "pursuit-logo")
+        pi.contentMode = .scaleAspectFit
+        return pi
+    }()
+    
     lazy var loginButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Login", for: .normal)
@@ -99,8 +106,9 @@ class LoginViewController: UIViewController {
         
         self.containerViewBottomConstraint.constant = -10 - (keyboardFreme.height)
         self.containerViewTopConstraint.constant = 500 - (keyboardFreme.height)
-        
         UIView.animate(withDuration: duration) {
+            self.pursuitImage.isHidden = true
+
             self.view.layoutIfNeeded()
         }
     }
@@ -114,6 +122,7 @@ class LoginViewController: UIViewController {
         
         UIView.animate(withDuration: duration) {
             self.view.layoutIfNeeded()
+            self.pursuitImage.isHidden = false
         }
     }
     @objc func validateFields() {
@@ -206,6 +215,7 @@ class LoginViewController: UIViewController {
     private func setupSubViews() {
         configureContainerviewConstraints()
         setupLogoLabel()
+        setUpLogoImageConstraints()
         setupCreateAccountButton()
         setupLoginStackView()
     }
@@ -213,13 +223,30 @@ class LoginViewController: UIViewController {
     private func configureContainerviewConstraints(){
         view.addSubview(containerView)
         containerView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([containerView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor), containerView.leadingAnchor.constraint(equalTo: view.leadingAnchor), containerView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor), containerView.heightAnchor.constraint(equalToConstant: 400)])
+        NSLayoutConstraint.activate([
+          //  containerView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+            containerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            containerView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor), //containerView.heightAnchor.constraint(equalToConstant: 400)
+           
+        ])
         
         self.containerViewBottomConstraint = containerView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant:  -10)
         containerViewBottomConstraint.isActive = true
         
         self.containerViewTopConstraint = containerView.topAnchor.constraint(equalTo: view.topAnchor, constant: 500)
         containerViewTopConstraint.isActive = true
+    }
+    
+    private func setUpLogoImageConstraints() {
+        view.addSubview(pursuitImage)
+        pursuitImage.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            pursuitImage.topAnchor.constraint(equalTo: logoLabel.bottomAnchor,constant: 20),
+            pursuitImage.leadingAnchor.constraint(equalTo: view.leadingAnchor,constant: 50),
+            pursuitImage.trailingAnchor.constraint(equalTo: view.trailingAnchor,constant:  -50),
+            pursuitImage.heightAnchor.constraint(equalToConstant: view.frame.height * 0.4)
+        ])
     }
     private func setupLogoLabel() {
         view.addSubview(logoLabel)

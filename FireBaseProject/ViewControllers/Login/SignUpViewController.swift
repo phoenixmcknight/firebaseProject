@@ -31,6 +31,13 @@ class SignUpViewController: UIViewController {
         return textField
     }()
     
+    lazy var pursuitImage:UIImageView = {
+           let pi = UIImageView()
+           pi.image = UIImage(named: "pursuit-logo")
+           pi.contentMode = .scaleAspectFit
+           return pi
+       }()
+    
     lazy var passwordTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Enter Password"
@@ -55,6 +62,16 @@ class SignUpViewController: UIViewController {
         return button
     }()
     
+    lazy var stackView:UIStackView = {
+        
+       let stackView = UIStackView(arrangedSubviews: [emailTextField,passwordTextField,createButton])
+               stackView.axis = .vertical
+               stackView.spacing = 15
+               stackView.distribution = .fillEqually
+        
+        return stackView
+    }()
+    
     //MARK: Lifecycle
     
     override func viewDidLoad() {
@@ -62,6 +79,7 @@ class SignUpViewController: UIViewController {
         CustomLayer.shared.setGradientBackground(colorTop: .white, colorBottom: .lightGray, newView: view)
         setupHeaderLabel()
         setupCreateStackView()
+        setUpPursuitLogo()
         
         
     }
@@ -129,10 +147,7 @@ class SignUpViewController: UIViewController {
     }
     
     private func setupCreateStackView() {
-        let stackView = UIStackView(arrangedSubviews: [emailTextField,passwordTextField,createButton])
-        stackView.axis = .vertical
-        stackView.spacing = 15
-        stackView.distribution = .fillEqually
+       
         self.view.addSubview(stackView)
         
         stackView.translatesAutoresizingMaskIntoConstraints = false
@@ -141,6 +156,16 @@ class SignUpViewController: UIViewController {
             stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)])
     }
-    
+    private func setUpPursuitLogo() {
+        view.addSubview(pursuitImage)
+        pursuitImage.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            pursuitImage.topAnchor.constraint(equalTo: stackView.bottomAnchor,constant: 10),
+            pursuitImage.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            pursuitImage.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            pursuitImage.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            pursuitImage.heightAnchor.constraint(equalToConstant: view.frame.height * 0.6)
+        ])
+    }
     
 }
